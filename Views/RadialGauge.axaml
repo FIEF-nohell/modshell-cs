@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="modshell_hwtest.Views.RadialGauge"
+             Width="108">
+    <StackPanel>
+        <Grid Width="108" Height="108">
+            <Canvas Width="108" Height="108">
+                <Path x:Name="TrackPath" Stroke="#26222E" StrokeThickness="9" StrokeLineCap="Round" />
+                <Path x:Name="DangerPath" Stroke="#4D2430" StrokeThickness="9" StrokeLineCap="Round" />
+                <Path x:Name="ValuePath" StrokeThickness="9" StrokeLineCap="Round" />
+            </Canvas>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="0">
+                <TextBlock x:Name="ValueText" FontFamily="Cascadia Mono,Consolas,Courier New,monospace"
+                           FontSize="24" FontWeight="Bold" Foreground="#F2F0F8" HorizontalAlignment="Center" />
+                <TextBlock x:Name="UnitLabel" Text="%" FontFamily="Cascadia Mono,Consolas,Courier New,monospace"
+                           FontSize="11" Foreground="#6B677E" LetterSpacing="1" HorizontalAlignment="Center" />
+            </StackPanel>
+        </Grid>
+        <TextBlock x:Name="CaptionLabel" FontFamily="Cascadia Mono,Consolas,Courier New,monospace"
+                   FontSize="11" Foreground="#6B677E" LetterSpacing="2" Margin="0,4,0,0"
+                   HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+    </StackPanel>
+</UserControl>
