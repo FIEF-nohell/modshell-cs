@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <!-- UpgradeCode must stay fixed for the life of the product so that new
+       versions upgrade the installed copy instead of installing alongside it. -->
+  <Package
+      Name="modshell hwtest"
+      Manufacturer="Noel Hofmann"
+      Version="$(var.AppVersion)"
+      UpgradeCode="F6DFBA69-38D8-4B71-BE77-8A1D819EFA43"
+      Scope="perMachine"
+      Compressed="yes">
+
+    <SummaryInformation Description="Hardware monitor prototype" />
+
+    <MajorUpgrade
+        AllowSameVersionUpgrades="yes"
+        DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon.ico" SourceFile="$(var.RepoRoot)\Assets\app-icon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
+    <Property Id="ARPNOREPAIR" Value="1" />
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="modshell hwtest" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AppMenuFolder" Name="modshell hwtest" />
+    </StandardDirectory>
+
+    <Feature Id="Main" Title="modshell hwtest" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentGroupRef Id="AppShortcuts" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <!-- Harvests the whole self-contained publish output. -->
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.PublishDir)\**" />
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="AppShortcuts">
+      <Component Id="StartMenuShortcut" Directory="AppMenuFolder" Guid="*">
+        <Shortcut Id="AppStartMenuShortcut"
+                  Name="modshell hwtest"
+                  Description="Live CPU, GPU, memory and network monitor"
+                  Target="[INSTALLFOLDER]modshell-hwtest.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="AppIcon.ico" />
+        <RemoveFolder Id="RemoveAppMenuFolder" Directory="AppMenuFolder" On="uninstall" />
+        <RegistryValue Root="HKCU"
+                       Key="Software\NoelHofmann\modshell-hwtest"
+                       Name="installed"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+</Wix>
