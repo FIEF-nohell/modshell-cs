@@ -39,7 +39,6 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     private readonly ObservableCollection<double> _cpuUsageHistory = new();
     private readonly ObservableCollection<double> _gpuUsageHistory = new();
-    private readonly ObservableCollection<double> _memPercentHistory = new();
     private readonly ObservableCollection<double> _cpuTempHistory = new();
     private readonly ObservableCollection<double> _gpuTempHistory = new();
     private readonly ObservableCollection<double> _memUsedHistory = new();
@@ -63,17 +62,23 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     public SolidColorPaint TooltipBackground { get; } = new(new SKColor(0x1C, 0x19, 0x26));
     public SolidColorPaint TooltipText { get; } = new(new SKColor(0xF2, 0xF0, 0xF8));
 
-    public ISeries[] UtilizationSeries { get; }
-    public ISeries[] ThermalSeries { get; }
+    public ISeries[] CpuUtilizationSeries { get; }
+    public ISeries[] CpuThermalSeries { get; }
+    public ISeries[] GpuUtilizationSeries { get; }
+    public ISeries[] GpuThermalSeries { get; }
     public ISeries[] MemorySeries { get; }
     public ISeries[] NetUpSeries { get; }
     public ISeries[] NetDownSeries { get; }
     public ISeries[] PingSeries { get; }
 
-    public Axis[] UtilizationXAxes { get; } = [XAxis()];
-    public Axis[] UtilizationYAxes { get; } = [YAxis(100)];
-    public Axis[] ThermalXAxes { get; } = [XAxis()];
-    public Axis[] ThermalYAxes { get; } = [YAxis(100)];
+    public Axis[] CpuUtilizationXAxes { get; } = [XAxis()];
+    public Axis[] CpuUtilizationYAxes { get; } = [YAxis(100)];
+    public Axis[] CpuThermalXAxes { get; } = [XAxis()];
+    public Axis[] CpuThermalYAxes { get; } = [YAxis(100)];
+    public Axis[] GpuUtilizationXAxes { get; } = [XAxis()];
+    public Axis[] GpuUtilizationYAxes { get; } = [YAxis(100)];
+    public Axis[] GpuThermalXAxes { get; } = [XAxis()];
+    public Axis[] GpuThermalYAxes { get; } = [YAxis(100)];
     public Axis[] MemoryXAxes { get; } = [XAxis()];
     public Axis[] MemoryYAxes { get; }
     public Axis[] NetUpXAxes { get; } = [XAxis()];
@@ -96,17 +101,10 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
         MemoryYAxes = [_memYAxis];
 
-        UtilizationSeries =
-        [
-            Trace(_cpuUsageHistory, CpuTraceColor, "cpu", "%"),
-            Trace(_gpuUsageHistory, GpuTraceColor, "gpu", "%"),
-            Trace(_memPercentHistory, MemTraceColor, "mem", "%"),
-        ];
-        ThermalSeries =
-        [
-            Trace(_cpuTempHistory, CpuTraceColor, "cpu", "°C"),
-            Trace(_gpuTempHistory, GpuTraceColor, "gpu", "°C"),
-        ];
+        CpuUtilizationSeries = [Trace(_cpuUsageHistory, CpuTraceColor, "cpu", "%")];
+        CpuThermalSeries = [Trace(_cpuTempHistory, CpuTraceColor, "cpu", "°C")];
+        GpuUtilizationSeries = [Trace(_gpuUsageHistory, GpuTraceColor, "gpu", "%")];
+        GpuThermalSeries = [Trace(_gpuTempHistory, GpuTraceColor, "gpu", "°C")];
         MemorySeries = [Trace(_memUsedHistory, MemTraceColor, "mem", " GB")];
         NetUpSeries = [Spark(_netUpHistory, CpuTraceColor, "up", v => Formatting.BytesPerSecond(v))];
         NetDownSeries = [Spark(_netDownHistory, CpuTraceColor, "down", v => Formatting.BytesPerSecond(v))];
@@ -182,8 +180,6 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                 CoreCount = snapshot.CpuPerCoreUsage.Length;
                 IsHighCoreCount = CoreCount > HighCoreCountThreshold;
 
-                var memPercent = snapshot.MemTotalGb > 0 ? snapshot.MemUsedGb / snapshot.MemTotalGb * 100 : 0;
-
                 if (snapshot.MemTotalGb > 0)
                 {
                     _memYAxis.MaxLimit = snapshot.MemTotalGb;
@@ -191,7 +187,6 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
                 AppendHistory(_cpuUsageHistory, snapshot.CpuUsage);
                 AppendHistory(_gpuUsageHistory, snapshot.GpuUsage);
-                AppendHistory(_memPercentHistory, memPercent);
                 AppendHistory(_cpuTempHistory, snapshot.CpuTempC ?? 0);
                 AppendHistory(_gpuTempHistory, snapshot.GpuTempC ?? 0);
                 AppendHistory(_memUsedHistory, snapshot.MemUsedGb);
