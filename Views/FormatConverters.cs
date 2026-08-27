@@ -48,7 +48,7 @@ public class MetricPairFormatConverter : IMultiValueConverter
 
 /// <summary>
 /// Picks a column count for the per-core list so it stays legible whether
-/// the CPU has 4 cores or 32 — few cores get 2 columns, more get up to 4.
+/// the CPU has 4 cores or 32: few cores get 2 columns, more get up to 4.
 /// </summary>
 public class CoreColumnsConverter : IValueConverter
 {

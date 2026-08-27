@@ -1,8 +1,9 @@
 # modshell hwtest
 
-A lightweight, always-on hardware monitor for Windows. CPU, GPU, memory,
-per-core load, network throughput, and ping — one dark, dense dashboard
-that refreshes every second, built with Avalonia and LibreHardwareMonitor.
+A lightweight, always-on hardware monitor for Windows: CPU, GPU, memory,
+per-core load, network throughput, and ping, all in one dark, dense
+dashboard that refreshes every second, built with Avalonia and
+LibreHardwareMonitor.
 
 ![CI](https://github.com/FIEF-nohell/modshell-cs/actions/workflows/ci.yml/badge.svg)
 ![Release](https://github.com/FIEF-nohell/modshell-cs/actions/workflows/release.yml/badge.svg)
@@ -11,27 +12,27 @@ that refreshes every second, built with Avalonia and LibreHardwareMonitor.
 
 ## Features
 
-- **CPU** — total utilization, package temperature, per-core load
-- **GPU** — utilization, temperature, power draw, VRAM used/total
-- **Memory** — used/total with a live trend graph
-- **Network** — upload/download throughput sparklines
-- **Ping** — round-trip latency to a configurable host
+- **CPU**: total utilization, package temperature, per-core load
+- **GPU**: utilization, temperature, power draw, VRAM used/total
+- **Memory**: used/total with a live trend graph
+- **Network**: upload/download throughput sparklines
+- **Ping**: round-trip latency to a configurable host
 - **60-second trend charts** for utilization and thermals
-- **Adaptive core grid** — a readable label+bar list on mainstream CPUs,
+- **Adaptive core grid**: a readable label+bar list on mainstream CPUs,
   automatically switching to a compact color-coded tile grid once a chip
-  has more cores than fit legibly (HEDT/workstation territory —
+  has more cores than fit legibly (HEDT/workstation territory:
   Threadripper, Xeon, EPYC)
 
 ## Tech stack
 
 - [.NET 8](https://dotnet.microsoft.com/) / C#
-- [Avalonia UI](https://avaloniaui.net/) + FluentAvalonia — cross-platform-capable
+- [Avalonia UI](https://avaloniaui.net/) + FluentAvalonia, cross-platform-capable
   desktop UI, currently packaged for Windows
-- [LibreHardwareMonitorLib](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) —
+- [LibreHardwareMonitorLib](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor),
   sensor access (CPU/GPU/memory/network)
-- [LiveCharts2](https://livecharts.dev/) — the trend graphs
-- [CommunityToolkit.Mvvm](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/) — MVVM plumbing
-- [WiX Toolset v5](https://wixtoolset.org/) — MSI installer packaging
+- [LiveCharts2](https://livecharts.dev/), the trend graphs
+- [CommunityToolkit.Mvvm](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/), MVVM plumbing
+- [WiX Toolset v5](https://wixtoolset.org/), MSI installer packaging
 
 ## Running from source
 
@@ -42,7 +43,7 @@ dotnet run --project modshell-hwtest.csproj
 ```
 
 Reading most sensors (temperatures, some load counters) requires
-Administrator privileges on Windows — run the terminal elevated if values
+Administrator privileges on Windows: run the terminal elevated if values
 show as blank or zero.
 
 ## Building the installer
@@ -63,12 +64,12 @@ a specific version number.
 > ([details](https://wixtoolset.org/osmf/)) before it will build. This
 > project pins WiX v5, which does not require that.
 
-## Continuous integration & releases
+## Continuous integration and releases
 
-- **CI** (`.github/workflows/ci.yml`) — builds and publishes the app on
+- **CI** (`.github/workflows/ci.yml`): builds and publishes the app on
   every push and pull request against `main`, uploading the self-contained
   `win-x64` output as a workflow artifact.
-- **Release** (`.github/workflows/release.yml`) — triggered by pushing a
+- **Release** (`.github/workflows/release.yml`): triggered by pushing a
   tag matching `v*.*.*` (e.g. `v0.2.0`). Builds the MSI with the version
   taken from the tag and publishes it as a GitHub Release asset.
 
@@ -78,6 +79,8 @@ To cut a release:
 git tag v0.2.0
 git push origin v0.2.0
 ```
+
+See [AGENTS.md](AGENTS.md) for the full tagging and release procedure.
 
 ## Roadmap
 
@@ -95,4 +98,4 @@ Ideas under consideration, roughly in priority order:
 
 ## License
 
-No license has been chosen yet — all rights reserved by default until one is added.
+No license has been chosen yet: all rights reserved by default until one is added.
