@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -19,6 +19,13 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 {
     private const int HistoryLength = 60;
     private const string PingHost = "google.com";
+
+    // The sparkline shows the last 60 samples, but a one minute window is far
+    // too short for tail percentiles or a meaningful loss rate: a single dropped
+    // reply would read as 1.7% loss. Ten minutes of one-per-second samples gives
+    // p99 six-hundred readings to sit on and keeps the arrays small enough to
+    // sort every tick without noticing.
+    private const int LatencyWindowSeconds = 600;
 
     // Above this many logical cores the per-core list (label + bar + %) no
     // longer fits legibly, so the view switches to a compact heat-tile grid.
@@ -45,11 +52,22 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private readonly ObservableCollection<double> _netUpHistory = new();
     private readonly ObservableCollection<double> _netDownHistory = new();
     private readonly ObservableCollection<double> _pingHistory = new();
+    private readonly LatencyTracker _latency = new(LatencyWindowSeconds);
 
     private readonly Axis _memYAxis = YAxis(32);
 
     [ObservableProperty]
     private HardwareSnapshot _currentSnapshot = new("...", 0, null, [], "...", 0, null, null, null, null, 0, 0, 0, 0, null);
+
+    [ObservableProperty]
+    private LatencyStats _latencyStats = LatencyStats.Empty;
+
+    /// <summary>Window coverage shown next to the ping header, so a warming-up
+    /// window is never mistaken for a full ten minutes of history.</summary>
+    [ObservableProperty]
+    private string _latencyWindowLabel = "warming up";
+
+    public string PingHeader { get; } = $"PING · {PingHost.ToUpperInvariant()}";
 
     public ObservableCollection<CoreUsageItem> PerCoreItems { get; } = new();
 
@@ -193,6 +211,11 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                 AppendHistory(_netUpHistory, snapshot.NetUpBytesPerSec);
                 AppendHistory(_netDownHistory, snapshot.NetDownBytesPerSec);
                 AppendHistory(_pingHistory, snapshot.PingMs ?? 0);
+
+                LatencyStats = _latency.Add(snapshot.PingMs);
+                LatencyWindowLabel = LatencyStats.SampleCount >= LatencyWindowSeconds
+                    ? $"last {LatencyWindowSeconds / 60} min"
+                    : $"last {LatencyStats.SampleCount}s";
             });
 
             try

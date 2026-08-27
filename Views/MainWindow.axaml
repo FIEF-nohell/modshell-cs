@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui"
+﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:modshell_hwtest.ViewModels"
         xmlns:views="using:modshell_hwtest.Views"
@@ -167,15 +167,43 @@
             </StackPanel>
         </Border>
 
+        <!-- Ping. A single reading says almost nothing about a link, so the live
+             value and sparkline sit above the distribution over the longer window. -->
         <Border Classes="panel" Grid.Row="2" Grid.Column="2">
             <StackPanel>
-                <TextBlock Classes="sectionHeader" Text="PING · GOOGLE.COM" />
+                <Grid ColumnDefinitions="Auto,*">
+                    <TextBlock Grid.Column="0" Classes="sectionHeader" Text="{Binding PingHeader}" />
+                    <TextBlock Grid.Column="1" Classes="rowLabel" HorizontalAlignment="Right"
+                               Text="{Binding LatencyWindowLabel}" />
+                </Grid>
+
                 <controls:MetricRow Label="latency" LabelMinWidth="58" ValueMinWidth="70"
                                     Value="{Binding CurrentSnapshot.PingMs, Converter={StaticResource Fmt}, ConverterParameter=Milliseconds}">
                     <lvc:CartesianChart Series="{Binding PingSeries}"
                                         XAxes="{Binding PingXAxes}" YAxes="{Binding PingYAxes}"
                                         Height="26" TooltipPosition="Hidden" LegendPosition="Hidden" />
                 </controls:MetricRow>
+
+                <Border Classes="divider" />
+
+                <UniformGrid Columns="2">
+                    <controls:MetricRow Margin="0,3,10,3" LabelMinWidth="30" ValueMinWidth="56" Label="avg"
+                                        Value="{Binding LatencyStats.Average, Converter={StaticResource Fmt}, ConverterParameter=MillisecondsFine}" />
+                    <controls:MetricRow Margin="0,3,0,3" LabelMinWidth="30" ValueMinWidth="56" Label="jitter"
+                                        Value="{Binding LatencyStats.Jitter, Converter={StaticResource Fmt}, ConverterParameter=MillisecondsFine}" />
+                    <controls:MetricRow Margin="0,3,10,3" LabelMinWidth="30" ValueMinWidth="56" Label="p50"
+                                        Value="{Binding LatencyStats.P50, Converter={StaticResource Fmt}, ConverterParameter=Milliseconds}" />
+                    <controls:MetricRow Margin="0,3,0,3" LabelMinWidth="30" ValueMinWidth="56" Label="p95"
+                                        Value="{Binding LatencyStats.P95, Converter={StaticResource Fmt}, ConverterParameter=Milliseconds}" />
+                    <controls:MetricRow Margin="0,3,10,3" LabelMinWidth="30" ValueMinWidth="56" Label="p99"
+                                        Value="{Binding LatencyStats.P99, Converter={StaticResource Fmt}, ConverterParameter=Milliseconds}" />
+                    <controls:MetricRow Margin="0,3,0,3" LabelMinWidth="30" ValueMinWidth="56" Label="loss"
+                                        Value="{Binding LatencyStats.LossPercent, Converter={StaticResource Fmt}, ConverterParameter=PercentFine}" />
+                    <controls:MetricRow Margin="0,3,10,3" LabelMinWidth="30" ValueMinWidth="56" Label="min"
+                                        Value="{Binding LatencyStats.Min, Converter={StaticResource Fmt}, ConverterParameter=Milliseconds}" />
+                    <controls:MetricRow Margin="0,3,0,3" LabelMinWidth="30" ValueMinWidth="56" Label="max"
+                                        Value="{Binding LatencyStats.Max, Converter={StaticResource Fmt}, ConverterParameter=Milliseconds}" />
+                </UniformGrid>
             </StackPanel>
         </Border>
 

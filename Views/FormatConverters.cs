@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Avalonia.Data.Converters;
@@ -8,7 +8,8 @@ namespace modshell_hwtest.Views;
 
 /// <summary>
 /// Routes a single bound value through <see cref="Formatting"/>.
-/// ConverterParameter picks the format: Percent, Temperature, Watts, Milliseconds, BytesPerSecond, Integer.
+/// ConverterParameter picks the format: Percent, PercentFine, Temperature, Watts,
+/// Milliseconds, MillisecondsFine, BytesPerSecond, Integer.
 /// </summary>
 public class MetricFormatConverter : IValueConverter
 {
@@ -19,6 +20,8 @@ public class MetricFormatConverter : IValueConverter
             "Temperature" => Formatting.Temperature(value),
             "Watts" => Formatting.Watts(value),
             "Milliseconds" => Formatting.Milliseconds(value),
+            "MillisecondsFine" => Formatting.MillisecondsFine(value),
+            "PercentFine" => Formatting.PercentFine(value),
             "BytesPerSecond" => Formatting.BytesPerSecond(value),
             _ => Formatting.Integer(value),
         };

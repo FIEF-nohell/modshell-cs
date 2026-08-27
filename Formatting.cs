@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 
 namespace modshell_hwtest;
@@ -25,6 +25,17 @@ public static class Formatting
 
     public static string Milliseconds(object? value) =>
         TryNumber(value, out var n) ? n.ToString("0", CultureInfo.InvariantCulture) + " ms" : Unavailable;
+
+    /// <summary>
+    /// Milliseconds with one decimal, for figures where whole-millisecond
+    /// rounding hides the signal (jitter on a fast link is often under 1 ms).
+    /// </summary>
+    public static string MillisecondsFine(object? value) =>
+        TryNumber(value, out var n) ? n.ToString("0.0", CultureInfo.InvariantCulture) + " ms" : Unavailable;
+
+    /// <summary>Percent with one decimal, for rates that matter well below 1%.</summary>
+    public static string PercentFine(object? value) =>
+        TryNumber(value, out var n) ? n.ToString("0.0", CultureInfo.InvariantCulture) + "%" : Unavailable;
 
     public static string BytesPerSecond(object? value)
     {
