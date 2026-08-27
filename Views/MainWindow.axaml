@@ -30,8 +30,8 @@
         <views:LoadHeatColorConverter x:Key="HeatColor" />
     </Window.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-    <Grid Margin="18,42,18,18" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,*,*">
+    <ScrollViewer Margin="18,42,18,18" VerticalScrollBarVisibility="Auto">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,*,*">
 
         <!-- Row 0: headline vitals, all three share StatCard -->
         <controls:StatCard Grid.Row="0" Grid.Column="0" Title="CPU"
