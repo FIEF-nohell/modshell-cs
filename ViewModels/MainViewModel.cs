@@ -20,6 +20,12 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private const int HistoryLength = 60;
     private const string PingHost = "google.com";
 
+    // Above this many logical cores the per-core list (label + bar + %) no
+    // longer fits legibly, so the view switches to a compact heat-tile grid.
+    // Chosen so mainstream desktop/laptop CPUs (up to 32 threads) keep the
+    // detailed list, while HEDT/workstation chips (Threadripper, Xeon) get tiles.
+    private const int HighCoreCountThreshold = 32;
+
     private static readonly SKColor LabelColor = new(0x6B, 0x67, 0x7E);
     private static readonly SKColor GridColor = new(0x1D, 0x1A, 0x25);
 
@@ -47,6 +53,12 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private HardwareSnapshot _currentSnapshot = new("...", 0, null, [], "...", 0, null, null, null, null, 0, 0, 0, 0, null);
 
     public ObservableCollection<CoreUsageItem> PerCoreItems { get; } = new();
+
+    [ObservableProperty]
+    private int _coreCount;
+
+    [ObservableProperty]
+    private bool _isHighCoreCount;
 
     public SolidColorPaint TooltipBackground { get; } = new(new SKColor(0x1C, 0x19, 0x26));
     public SolidColorPaint TooltipText { get; } = new(new SKColor(0xF2, 0xF0, 0xF8));
@@ -166,6 +178,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                 {
                     PerCoreItems.Add(new CoreUsageItem(i, snapshot.CpuPerCoreUsage[i]));
                 }
+
+                CoreCount = snapshot.CpuPerCoreUsage.Length;
+                IsHighCoreCount = CoreCount > HighCoreCountThreshold;
 
                 var memPercent = snapshot.MemTotalGb > 0 ? snapshot.MemUsedGb / snapshot.MemTotalGb * 100 : 0;
 
