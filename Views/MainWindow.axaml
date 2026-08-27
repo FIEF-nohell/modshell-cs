@@ -30,7 +30,8 @@
         <views:LoadHeatColorConverter x:Key="HeatColor" />
     </Window.Resources>
 
-    <Grid Margin="18,42,18,18" RowDefinitions="Auto,Auto,Auto,*,*" ColumnDefinitions="*,*,*">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid Margin="18,42,18,18" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,*,*">
 
         <!-- Row 0: headline vitals, all three share StatCard -->
         <controls:StatCard Grid.Row="0" Grid.Column="0" Title="CPU"
@@ -44,18 +45,7 @@
             </UniformGrid>
         </controls:StatCard>
 
-        <controls:StatCard Grid.Row="0" Grid.Column="1" Title="GPU"
-                           Detail="{Binding CurrentSnapshot.GpuName}">
-            <UniformGrid Columns="2">
-                <views:RadialGauge Caption="UTIL" Unit="%" HorizontalAlignment="Center"
-                                   Value="{Binding CurrentSnapshot.GpuUsage}" />
-                <views:RadialGauge Caption="TEMP" Unit="°C" HorizontalAlignment="Center"
-                                   ShowDangerZone="True" WarnThreshold="75" DangerThreshold="90"
-                                   Value="{Binding CurrentSnapshot.GpuTempC}" />
-            </UniformGrid>
-        </controls:StatCard>
-
-        <controls:StatCard Grid.Row="0" Grid.Column="2" Title="MEMORY">
+        <controls:StatCard Grid.Row="0" Grid.Column="1" Title="MEMORY">
             <Grid RowDefinitions="Auto,*">
                 <TextBlock Grid.Row="0" Classes="headline" Margin="0,0,0,8" TextTrimming="CharacterEllipsis">
                     <TextBlock.Text>
@@ -72,6 +62,17 @@
                                     TooltipTextPaint="{Binding TooltipText}" TooltipTextSize="12"
                                     LegendPosition="Hidden" />
             </Grid>
+        </controls:StatCard>
+
+        <controls:StatCard Grid.Row="0" Grid.Column="2" Title="GPU"
+                           Detail="{Binding CurrentSnapshot.GpuName}">
+            <UniformGrid Columns="2">
+                <views:RadialGauge Caption="UTIL" Unit="%" HorizontalAlignment="Center"
+                                   Value="{Binding CurrentSnapshot.GpuUsage}" />
+                <views:RadialGauge Caption="TEMP" Unit="°C" HorizontalAlignment="Center"
+                                   ShowDangerZone="True" WarnThreshold="75" DangerThreshold="90"
+                                   Value="{Binding CurrentSnapshot.GpuTempC}" />
+            </UniformGrid>
         </controls:StatCard>
 
         <!-- Row 1: per-core detail. Below the high-core-count threshold this is a
@@ -178,7 +179,7 @@
             </StackPanel>
         </Border>
 
-        <!-- Row 3: CPU trends, util and temp side by side, each its own chart. -->
+        <!-- Row 3: utilization, cpu left / gpu right. -->
         <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" ColumnDefinitions="*,*">
             <Border Classes="panel" Grid.Column="0">
                 <Grid RowDefinitions="Auto,*">
@@ -198,11 +199,11 @@
             <Border Classes="panel" Grid.Column="1">
                 <Grid RowDefinitions="Auto,*">
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6">
-                        <Ellipse Classes="legendDot" Fill="#8B5CF6" />
-                        <TextBlock Classes="sectionHeader" Margin="0" Text="CPU THERMALS (60S)" />
+                        <Ellipse Classes="legendDot" Fill="#22D3EE" />
+                        <TextBlock Classes="sectionHeader" Margin="0" Text="GPU UTILIZATION (60S)" />
                     </StackPanel>
-                    <lvc:CartesianChart Grid.Row="1" Series="{Binding CpuThermalSeries}" XAxes="{Binding CpuThermalXAxes}"
-                                        YAxes="{Binding CpuThermalYAxes}" MinHeight="130" Margin="0,10,0,0"
+                    <lvc:CartesianChart Grid.Row="1" Series="{Binding GpuUtilizationSeries}" XAxes="{Binding GpuUtilizationXAxes}"
+                                        YAxes="{Binding GpuUtilizationYAxes}" MinHeight="130" Margin="0,10,0,0"
                                         TooltipPosition="Top" FindingStrategy="CompareOnlyX"
                                         TooltipBackgroundPaint="{Binding TooltipBackground}"
                                         TooltipTextPaint="{Binding TooltipText}" TooltipTextSize="12"
@@ -211,16 +212,16 @@
             </Border>
         </Grid>
 
-        <!-- Row 4: GPU trends, util and temp side by side, each its own chart. -->
+        <!-- Row 4: thermals, cpu left / gpu right. -->
         <Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" ColumnDefinitions="*,*">
             <Border Classes="panel" Grid.Column="0">
                 <Grid RowDefinitions="Auto,*">
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6">
-                        <Ellipse Classes="legendDot" Fill="#22D3EE" />
-                        <TextBlock Classes="sectionHeader" Margin="0" Text="GPU UTILIZATION (60S)" />
+                        <Ellipse Classes="legendDot" Fill="#8B5CF6" />
+                        <TextBlock Classes="sectionHeader" Margin="0" Text="CPU THERMALS (60S)" />
                     </StackPanel>
-                    <lvc:CartesianChart Grid.Row="1" Series="{Binding GpuUtilizationSeries}" XAxes="{Binding GpuUtilizationXAxes}"
-                                        YAxes="{Binding GpuUtilizationYAxes}" MinHeight="130" Margin="0,10,0,0"
+                    <lvc:CartesianChart Grid.Row="1" Series="{Binding CpuThermalSeries}" XAxes="{Binding CpuThermalXAxes}"
+                                        YAxes="{Binding CpuThermalYAxes}" MinHeight="130" Margin="0,10,0,0"
                                         TooltipPosition="Top" FindingStrategy="CompareOnlyX"
                                         TooltipBackgroundPaint="{Binding TooltipBackground}"
                                         TooltipTextPaint="{Binding TooltipText}" TooltipTextSize="12"
@@ -245,5 +246,6 @@
         </Grid>
 
     </Grid>
+    </ScrollViewer>
 
 </Window>
