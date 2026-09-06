@@ -6,6 +6,7 @@
     <!-- One row layout for every label + bar/graph + value line in the app. -->
     <Style Selector="controls|MetricRow">
         <Setter Property="Margin" Value="0,4" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid ColumnDefinitions="Auto,*,Auto" ClipToBounds="True">
@@ -23,7 +24,7 @@
                                       Margin="10,0"
                                       MinWidth="0"
                                       ClipToBounds="True"
-                                      VerticalAlignment="Center" />
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
 
                     <TextBlock Grid.Column="2"
                                Text="{TemplateBinding Value}"

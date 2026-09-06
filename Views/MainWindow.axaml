@@ -3,7 +3,6 @@
         xmlns:vm="using:modshell_hwtest.ViewModels"
         xmlns:views="using:modshell_hwtest.Views"
         xmlns:controls="using:modshell_hwtest.Controls"
-        xmlns:models="using:modshell_hwtest.Models"
         xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -37,11 +36,15 @@
         <controls:StatCard Grid.Row="0" Grid.Column="0" Title="CPU"
                            Detail="{Binding CurrentSnapshot.CpuName}">
             <UniformGrid Columns="2">
-                <views:RadialGauge Caption="UTIL" Unit="%" HorizontalAlignment="Center"
-                                   Value="{Binding CurrentSnapshot.CpuUsage}" />
-                <views:RadialGauge Caption="TEMP" Unit="°C" HorizontalAlignment="Center"
-                                   ShowDangerZone="True" WarnThreshold="75" DangerThreshold="90"
-                                   Value="{Binding CurrentSnapshot.CpuTempC}" />
+                <Viewbox Stretch="Uniform" MaxWidth="96" HorizontalAlignment="Center">
+                    <views:RadialGauge Caption="UTIL" Unit="%"
+                                       Value="{Binding CurrentSnapshot.CpuUsage}" />
+                </Viewbox>
+                <Viewbox Stretch="Uniform" MaxWidth="96" HorizontalAlignment="Center">
+                    <views:RadialGauge Caption="TEMP" Unit="°C"
+                                       ShowDangerZone="True" WarnThreshold="75" DangerThreshold="90"
+                                       Value="{Binding CurrentSnapshot.CpuTempC}" />
+                </Viewbox>
             </UniformGrid>
         </controls:StatCard>
 
@@ -66,12 +69,22 @@
 
         <controls:StatCard Grid.Row="0" Grid.Column="2" Title="GPU"
                            Detail="{Binding CurrentSnapshot.GpuName}">
-            <UniformGrid Columns="2">
-                <views:RadialGauge Caption="UTIL" Unit="%" HorizontalAlignment="Center"
-                                   Value="{Binding CurrentSnapshot.GpuUsage}" />
-                <views:RadialGauge Caption="TEMP" Unit="°C" HorizontalAlignment="Center"
-                                   ShowDangerZone="True" WarnThreshold="75" DangerThreshold="90"
-                                   Value="{Binding CurrentSnapshot.GpuTempC}" />
+            <UniformGrid Columns="3">
+                <Viewbox Stretch="Uniform" MaxWidth="96" HorizontalAlignment="Center">
+                    <views:RadialGauge Caption="UTIL" Unit="%"
+                                       Value="{Binding CurrentSnapshot.GpuUsage}" />
+                </Viewbox>
+                <Viewbox Stretch="Uniform" MaxWidth="96" HorizontalAlignment="Center">
+                    <views:RadialGauge Caption="TEMP" Unit="°C"
+                                       ShowDangerZone="True" WarnThreshold="75" DangerThreshold="90"
+                                       Value="{Binding CurrentSnapshot.GpuTempC}" />
+                </Viewbox>
+                <!-- Watts have no universal danger line, so this gauge only reports the
+                     draw against a fixed 350 W scale and keeps the neutral arc colour. -->
+                <Viewbox Stretch="Uniform" MaxWidth="96" HorizontalAlignment="Center">
+                    <views:RadialGauge Caption="POWER" Unit="W" Maximum="350" DangerThreshold="0"
+                                       Value="{Binding CurrentSnapshot.GpuPowerWatts}" />
+                </Viewbox>
             </UniformGrid>
         </controls:StatCard>
 
@@ -93,12 +106,14 @@
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="models:CoreUsageItem">
+                        <DataTemplate x:DataType="vm:CoreUsageItem">
                             <controls:MetricRow Margin="0,4,18,4"
                                                 LabelMinWidth="30" ValueMinWidth="46"
                                                 Label="{Binding Index, StringFormat='C{0}'}"
                                                 Value="{Binding Value, Converter={StaticResource Fmt}, ConverterParameter=Percent}">
-                                <ProgressBar Classes="meter" Minimum="0" Maximum="100" Value="{Binding Value}" />
+                                <lvc:CartesianChart Series="{Binding Series}"
+                                                    XAxes="{Binding XAxes}" YAxes="{Binding YAxes}"
+                                                    Height="26" TooltipPosition="Hidden" LegendPosition="Hidden" />
                             </controls:MetricRow>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -111,7 +126,7 @@
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="models:CoreUsageItem">
+                        <DataTemplate x:DataType="vm:CoreUsageItem">
                             <Border Width="20" Height="20" Margin="2" CornerRadius="4"
                                     Background="{Binding Value, Converter={StaticResource HeatColor}}"
                                     ToolTip.Tip="{Binding Index, StringFormat='Core {0}'}" />
@@ -121,55 +136,10 @@
             </StackPanel>
         </Border>
 
-        <!-- Row 2: GPU detail, network, ping -->
-        <Border Classes="panel" Grid.Row="2" Grid.Column="0">
-            <StackPanel>
-                <TextBlock Classes="sectionHeader" Text="GPU DETAIL" />
-                <controls:MetricRow Label="vram" LabelMinWidth="52" ValueMinWidth="122">
-                    <controls:MetricRow.Value>
-                        <MultiBinding Converter="{StaticResource FmtPair}" ConverterParameter="Megabytes">
-                            <Binding Path="CurrentSnapshot.GpuVramUsedMb" />
-                            <Binding Path="CurrentSnapshot.GpuVramTotalMb" />
-                        </MultiBinding>
-                    </controls:MetricRow.Value>
-                    <ProgressBar Classes="meter" Minimum="0"
-                                 Maximum="{Binding CurrentSnapshot.GpuVramTotalMb}"
-                                 Value="{Binding CurrentSnapshot.GpuVramUsedMb}" />
-                </controls:MetricRow>
-                <controls:MetricRow Label="power" LabelMinWidth="52" ValueMinWidth="122"
-                                    Value="{Binding CurrentSnapshot.GpuPowerWatts, Converter={StaticResource Fmt}, ConverterParameter=Watts}">
-                    <ProgressBar Classes="meter" Minimum="0" Maximum="350"
-                                 Value="{Binding CurrentSnapshot.GpuPowerWatts}" />
-                </controls:MetricRow>
-                <controls:MetricRow Label="temp" LabelMinWidth="52" ValueMinWidth="122"
-                                    Value="{Binding CurrentSnapshot.GpuTempC, Converter={StaticResource Fmt}, ConverterParameter=Temperature}">
-                    <ProgressBar Classes="meter" Minimum="0" Maximum="100"
-                                 Value="{Binding CurrentSnapshot.GpuTempC}" />
-                </controls:MetricRow>
-            </StackPanel>
-        </Border>
-
-        <Border Classes="panel" Grid.Row="2" Grid.Column="1">
-            <StackPanel>
-                <TextBlock Classes="sectionHeader" Text="NETWORK" />
-                <controls:MetricRow Label="down" LabelMinWidth="46" ValueMinWidth="90"
-                                    Value="{Binding CurrentSnapshot.NetDownBytesPerSec, Converter={StaticResource Fmt}, ConverterParameter=BytesPerSecond}">
-                    <lvc:CartesianChart Series="{Binding NetDownSeries}"
-                                        XAxes="{Binding NetDownXAxes}" YAxes="{Binding NetDownYAxes}"
-                                        Height="26" TooltipPosition="Hidden" LegendPosition="Hidden" />
-                </controls:MetricRow>
-                <controls:MetricRow Label="up" LabelMinWidth="46" ValueMinWidth="90"
-                                    Value="{Binding CurrentSnapshot.NetUpBytesPerSec, Converter={StaticResource Fmt}, ConverterParameter=BytesPerSecond}">
-                    <lvc:CartesianChart Series="{Binding NetUpSeries}"
-                                        XAxes="{Binding NetUpXAxes}" YAxes="{Binding NetUpYAxes}"
-                                        Height="26" TooltipPosition="Hidden" LegendPosition="Hidden" />
-                </controls:MetricRow>
-            </StackPanel>
-        </Border>
-
+        <!-- Row 2: ping, network, vram -->
         <!-- Ping. A single reading says almost nothing about a link, so the live
              value and sparkline sit above the distribution over the longer window. -->
-        <Border Classes="panel" Grid.Row="2" Grid.Column="2">
+        <Border Classes="panel" Grid.Row="2" Grid.Column="0">
             <StackPanel>
                 <Grid ColumnDefinitions="Auto,*">
                     <TextBlock Grid.Column="0" Classes="sectionHeader" Text="{Binding PingHeader}" />
@@ -205,6 +175,55 @@
                                         Value="{Binding LatencyStats.Max, Converter={StaticResource Fmt}, ConverterParameter=Milliseconds}" />
                 </UniformGrid>
             </StackPanel>
+        </Border>
+
+        <Border Classes="panel" Grid.Row="2" Grid.Column="1">
+            <Grid RowDefinitions="Auto,*,*">
+                <TextBlock Grid.Row="0" Classes="sectionHeader" Text="NETWORK" />
+                <controls:MetricRow Grid.Row="1" Label="down" LabelMinWidth="46" ValueMinWidth="90"
+                                    VerticalContentAlignment="Stretch"
+                                    Value="{Binding CurrentSnapshot.NetDownBytesPerSec, Converter={StaticResource Fmt}, ConverterParameter=BytesPerSecond}">
+                    <lvc:CartesianChart Series="{Binding NetDownSeries}"
+                                        XAxes="{Binding NetDownXAxes}" YAxes="{Binding NetDownYAxes}"
+                                        MinHeight="26" TooltipPosition="Hidden" LegendPosition="Hidden" />
+                </controls:MetricRow>
+                <controls:MetricRow Grid.Row="2" Label="up" LabelMinWidth="46" ValueMinWidth="90"
+                                    VerticalContentAlignment="Stretch"
+                                    Value="{Binding CurrentSnapshot.NetUpBytesPerSec, Converter={StaticResource Fmt}, ConverterParameter=BytesPerSecond}">
+                    <lvc:CartesianChart Series="{Binding NetUpSeries}"
+                                        XAxes="{Binding NetUpXAxes}" YAxes="{Binding NetUpYAxes}"
+                                        MinHeight="26" TooltipPosition="Hidden" LegendPosition="Hidden" />
+                </controls:MetricRow>
+            </Grid>
+        </Border>
+
+        <!-- VRAM. Row 2's height is set by the ping card, so this gets the room for a
+             full trend line rather than another one-line meter. -->
+        <Border Classes="panel" Grid.Row="2" Grid.Column="2">
+            <Grid RowDefinitions="Auto,*">
+                <Grid Grid.Row="0" ColumnDefinitions="Auto,*">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                        <Ellipse Classes="legendDot" Fill="#22D3EE" />
+                        <TextBlock Classes="sectionHeader" Margin="0" Text="VRAM (60S)" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Classes="rowLabel" HorizontalAlignment="Right"
+                               TextTrimming="CharacterEllipsis">
+                        <TextBlock.Text>
+                            <MultiBinding Converter="{StaticResource FmtPair}" ConverterParameter="Megabytes">
+                                <Binding Path="CurrentSnapshot.GpuVramUsedMb" />
+                                <Binding Path="CurrentSnapshot.GpuVramTotalMb" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </Grid>
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding GpuVramSeries}"
+                                    XAxes="{Binding GpuVramXAxes}" YAxes="{Binding GpuVramYAxes}"
+                                    MinHeight="130" Margin="0,10,0,0"
+                                    TooltipPosition="Top" FindingStrategy="CompareOnlyX"
+                                    TooltipBackgroundPaint="{Binding TooltipBackground}"
+                                    TooltipTextPaint="{Binding TooltipText}" TooltipTextSize="12"
+                                    LegendPosition="Hidden" />
+            </Grid>
         </Border>
 
         <!-- Row 3: utilization, cpu left / gpu right. -->

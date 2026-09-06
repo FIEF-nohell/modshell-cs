@@ -52,9 +52,11 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private readonly ObservableCollection<double> _netUpHistory = new();
     private readonly ObservableCollection<double> _netDownHistory = new();
     private readonly ObservableCollection<double> _pingHistory = new();
+    private readonly ObservableCollection<double> _gpuVramUsedHistory = new();
     private readonly LatencyTracker _latency = new(LatencyWindowSeconds);
 
     private readonly Axis _memYAxis = YAxis(32);
+    private readonly Axis _vramYAxis = YAxis(8192);
 
     [ObservableProperty]
     private HardwareSnapshot _currentSnapshot = new("...", 0, null, [], "...", 0, null, null, null, null, 0, 0, 0, 0, null);
@@ -88,6 +90,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     public ISeries[] NetUpSeries { get; }
     public ISeries[] NetDownSeries { get; }
     public ISeries[] PingSeries { get; }
+    public ISeries[] GpuVramSeries { get; }
 
     public Axis[] CpuUtilizationXAxes { get; } = [XAxis()];
     public Axis[] CpuUtilizationYAxes { get; } = [YAxis(100)];
@@ -105,6 +108,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     public Axis[] NetDownYAxes { get; } = [HiddenAxis()];
     public Axis[] PingXAxes { get; } = [XAxis()];
     public Axis[] PingYAxes { get; } = [HiddenAxis()];
+    public Axis[] GpuVramXAxes { get; } = [XAxis()];
+    public Axis[] GpuVramYAxes { get; }
 
     public MainViewModel()
     {
@@ -118,12 +123,14 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         _computer.Open();
 
         MemoryYAxes = [_memYAxis];
+        GpuVramYAxes = [_vramYAxis];
 
         CpuUtilizationSeries = [Trace(_cpuUsageHistory, CpuTraceColor, "cpu", "%")];
         CpuThermalSeries = [Trace(_cpuTempHistory, CpuTraceColor, "cpu", "°C")];
         GpuUtilizationSeries = [Trace(_gpuUsageHistory, GpuTraceColor, "gpu", "%")];
         GpuThermalSeries = [Trace(_gpuTempHistory, GpuTraceColor, "gpu", "°C")];
         MemorySeries = [Trace(_memUsedHistory, MemTraceColor, "mem", " GB")];
+        GpuVramSeries = [Trace(_gpuVramUsedHistory, GpuTraceColor, "vram", " MB")];
         NetUpSeries = [Spark(_netUpHistory, CpuTraceColor, "up", v => Formatting.BytesPerSecond(v))];
         NetDownSeries = [Spark(_netDownHistory, CpuTraceColor, "down", v => Formatting.BytesPerSecond(v))];
         PingSeries = [Spark(_pingHistory, CpuTraceColor, "ping", v => Formatting.Milliseconds(v))];
@@ -179,6 +186,23 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     private static Axis HiddenAxis() => new() { IsVisible = false };
 
+    /// <summary>Invisible axis pinned to a fixed range, so sibling sparklines
+    /// share one scale instead of each autoscaling to its own peak.</summary>
+    private static Axis HiddenAxis(double max) => new() { IsVisible = false, MinLimit = 0, MaxLimit = max };
+
+    /// <summary>Builds a core row and its sparkline. Cores are created once and
+    /// then mutated in place, so this only runs when the core count changes.</summary>
+    private static CoreUsageItem CreateCoreItem(int index)
+    {
+        var history = new ObservableCollection<double>();
+        return new CoreUsageItem(
+            index,
+            history,
+            [Spark(history, CpuTraceColor, $"c{index}", v => Formatting.Percent(v))],
+            [XAxis()],
+            [HiddenAxis(100)]);
+    }
+
     private async Task RunLoopAsync(CancellationToken token)
     {
         while (!token.IsCancellationRequested)
@@ -189,13 +213,26 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             {
                 CurrentSnapshot = snapshot;
 
-                PerCoreItems.Clear();
-                for (var i = 0; i < snapshot.CpuPerCoreUsage.Length; i++)
+                var perCore = snapshot.CpuPerCoreUsage;
+
+                // Rebuilding the list every tick would throw away each core's sparkline
+                // history, so items are only recreated when the core count actually changes.
+                if (PerCoreItems.Count != perCore.Length)
                 {
-                    PerCoreItems.Add(new CoreUsageItem(i, snapshot.CpuPerCoreUsage[i]));
+                    PerCoreItems.Clear();
+                    for (var i = 0; i < perCore.Length; i++)
+                    {
+                        PerCoreItems.Add(CreateCoreItem(i));
+                    }
                 }
 
-                CoreCount = snapshot.CpuPerCoreUsage.Length;
+                for (var i = 0; i < perCore.Length; i++)
+                {
+                    PerCoreItems[i].Value = perCore[i];
+                    AppendHistory(PerCoreItems[i].History, perCore[i]);
+                }
+
+                CoreCount = perCore.Length;
                 IsHighCoreCount = CoreCount > HighCoreCountThreshold;
 
                 if (snapshot.MemTotalGb > 0)
@@ -203,11 +240,17 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                     _memYAxis.MaxLimit = snapshot.MemTotalGb;
                 }
 
+                if (snapshot.GpuVramTotalMb is > 0)
+                {
+                    _vramYAxis.MaxLimit = snapshot.GpuVramTotalMb.Value;
+                }
+
                 AppendHistory(_cpuUsageHistory, snapshot.CpuUsage);
                 AppendHistory(_gpuUsageHistory, snapshot.GpuUsage);
                 AppendHistory(_cpuTempHistory, snapshot.CpuTempC ?? 0);
                 AppendHistory(_gpuTempHistory, snapshot.GpuTempC ?? 0);
                 AppendHistory(_memUsedHistory, snapshot.MemUsedGb);
+                AppendHistory(_gpuVramUsedHistory, snapshot.GpuVramUsedMb ?? 0);
                 AppendHistory(_netUpHistory, snapshot.NetUpBytesPerSec);
                 AppendHistory(_netDownHistory, snapshot.NetDownBytesPerSec);
                 AppendHistory(_pingHistory, snapshot.PingMs ?? 0);
