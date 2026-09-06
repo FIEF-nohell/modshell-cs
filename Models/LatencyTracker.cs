@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace modshell_hwtest.Models;
+namespace modshell_cs.Models;
 
 /// <summary>
 /// Rolling window of ping attempts, and the single place latency statistics

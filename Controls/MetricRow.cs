@@ -2,7 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 
-namespace modshell_hwtest.Controls;
+namespace modshell_cs.Controls;
 
 /// <summary>
 /// The single row primitive for every label + bar/graph + value line in the app.

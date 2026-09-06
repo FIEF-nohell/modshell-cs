@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 
-namespace modshell_hwtest.Views;
+namespace modshell_cs.Views;
 
 public partial class MainWindow : Window
 {

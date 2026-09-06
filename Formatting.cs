@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace modshell_hwtest;
+namespace modshell_cs;
 
 /// <summary>
 /// The single source of truth for how every number in the app is rendered.

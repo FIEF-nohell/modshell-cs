@@ -1,4 +1,4 @@
-namespace modshell_hwtest.Models;
+namespace modshell_cs.Models;
 
 public record HardwareSnapshot(
     string CpuName,

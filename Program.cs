@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using System;
 
-namespace modshell_hwtest;
+namespace modshell_cs;
 
 sealed class Program
 {

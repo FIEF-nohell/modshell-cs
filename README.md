@@ -1,4 +1,4 @@
-# modshell hwtest
+# modshell hardware monitor
 
 A lightweight, always-on hardware monitor for Windows: CPU, GPU, memory,
 per-core load, network throughput, and ping, all in one dark, dense
@@ -39,7 +39,7 @@ LibreHardwareMonitor.
 Requires the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
 
 ```powershell
-dotnet run --project modshell-hwtest.csproj
+dotnet run --project modshell-cs.csproj
 ```
 
 Reading most sensors (temperatures, some load counters) requires
@@ -57,7 +57,7 @@ powershell -ExecutionPolicy Bypass -File installer\build-installer.ps1
 ```
 
 This publishes a self-contained `win-x64` build and packages it into
-`installer\output\modshell-hwtest-<version>.msi`. Pass `-Version` to stamp
+`installer\output\modshell-cs-<version>.msi`. Pass `-Version` to stamp
 a specific version number.
 
 > WiX v7+ requires accepting a separate paid-maintenance-fee EULA

@@ -2,7 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 
-namespace modshell_hwtest.Controls;
+namespace modshell_cs.Controls;
 
 /// <summary>
 /// The single card primitive for the headline vitals row, so CPU, GPU and

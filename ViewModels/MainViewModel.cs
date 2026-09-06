@@ -10,10 +10,10 @@ using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LibreHardwareMonitor.Hardware;
-using modshell_hwtest.Models;
+using modshell_cs.Models;
 using SkiaSharp;
 
-namespace modshell_hwtest.ViewModels;
+namespace modshell_cs.ViewModels;
 
 public partial class MainViewModel : ViewModelBase, IDisposable
 {

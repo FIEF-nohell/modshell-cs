@@ -3,7 +3,7 @@
   <!-- Layout-testing manifest only: runs asInvoker so the window can be driven and
        captured from a non-elevated session. CPU temp will read as unavailable here.
        The shipping build uses app.manifest, which requires administrator. -->
-  <assemblyIdentity version="1.0.0.0" name="modshell_hwtest.Desktop"/>
+  <assemblyIdentity version="1.0.0.0" name="modshell_cs.Desktop"/>
 
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>

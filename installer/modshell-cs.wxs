@@ -4,7 +4,7 @@
   <!-- UpgradeCode must stay fixed for the life of the product so that new
        versions upgrade the installed copy instead of installing alongside it. -->
   <Package
-      Name="modshell hwtest"
+      Name="modshell hardware monitor"
       Manufacturer="Noel Hofmann"
       Version="$(var.AppVersion)"
       UpgradeCode="F6DFBA69-38D8-4B71-BE77-8A1D819EFA43"
@@ -24,14 +24,14 @@
     <Property Id="ARPNOREPAIR" Value="1" />
 
     <StandardDirectory Id="ProgramFiles6432Folder">
-      <Directory Id="INSTALLFOLDER" Name="modshell hwtest" />
+      <Directory Id="INSTALLFOLDER" Name="modshell hardware monitor" />
     </StandardDirectory>
 
     <StandardDirectory Id="ProgramMenuFolder">
-      <Directory Id="AppMenuFolder" Name="modshell hwtest" />
+      <Directory Id="AppMenuFolder" Name="modshell hardware monitor" />
     </StandardDirectory>
 
-    <Feature Id="Main" Title="modshell hwtest" Level="1">
+    <Feature Id="Main" Title="modshell hardware monitor" Level="1">
       <ComponentGroupRef Id="AppFiles" />
       <ComponentGroupRef Id="AppShortcuts" />
     </Feature>
@@ -48,14 +48,14 @@
     <ComponentGroup Id="AppShortcuts">
       <Component Id="StartMenuShortcut" Directory="AppMenuFolder" Guid="*">
         <Shortcut Id="AppStartMenuShortcut"
-                  Name="modshell hwtest"
+                  Name="modshell hardware monitor"
                   Description="Live CPU, GPU, memory and network monitor"
-                  Target="[INSTALLFOLDER]modshell-hwtest.exe"
+                  Target="[INSTALLFOLDER]modshell-cs.exe"
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="AppIcon.ico" />
         <RemoveFolder Id="RemoveAppMenuFolder" Directory="AppMenuFolder" On="uninstall" />
         <RegistryValue Root="HKCU"
-                       Key="Software\NoelHofmann\modshell-hwtest"
+                       Key="Software\NoelHofmann\modshell-cs"
                        Name="installed"
                        Type="integer"
                        Value="1"

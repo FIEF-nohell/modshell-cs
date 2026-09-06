@@ -2,10 +2,10 @@ using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using modshell_hwtest.ViewModels;
-using modshell_hwtest.Views;
+using modshell_cs.ViewModels;
+using modshell_cs.Views;
 
-namespace modshell_hwtest;
+namespace modshell_cs;
 
 public partial class App : Application
 {

@@ -36,7 +36,7 @@ jobs:
       - name: Upload MSI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: modshell-hwtest-installer
+          name: modshell-cs-installer
           path: installer/output/*.msi
 
       - name: Create GitHub release

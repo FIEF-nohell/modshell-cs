@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 
-namespace modshell_hwtest.ViewModels;
+namespace modshell_cs.ViewModels;
 
 /// <summary>
 /// One logical core in the per-core panel. Unlike the other readings this is

@@ -1,8 +1,8 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:styling="using:FluentAvalonia.Styling"
-             x:Class="modshell_hwtest.App"
-             xmlns:local="using:modshell_hwtest"
+             x:Class="modshell_cs.App"
+             xmlns:local="using:modshell_cs"
              RequestedThemeVariant="Dark">
 
     <Application.Resources>
@@ -11,7 +11,7 @@
 
     <TrayIcon.Icons>
         <TrayIcons>
-            <TrayIcon ToolTipText="modshell hwtest" Icon="/Assets/app-icon.ico" Clicked="OnTrayIconClicked">
+            <TrayIcon ToolTipText="modshell hardware monitor" Icon="/Assets/app-icon.ico" Clicked="OnTrayIconClicked">
                 <TrayIcon.Menu>
                     <NativeMenu>
                         <NativeMenuItem Header="Show" Click="OnTrayShowClicked" />

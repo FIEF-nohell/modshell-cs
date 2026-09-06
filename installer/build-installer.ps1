@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Publishes modshell-hwtest self-contained and packages it into an MSI.
+    Publishes modshell-cs self-contained and packages it into an MSI.
 
 .DESCRIPTION
-    Produces installer/output/modshell-hwtest-<version>.msi. The MSI installs
+    Produces installer/output/modshell-cs-<version>.msi. The MSI installs
     per-machine into Program Files, adds a Start Menu shortcut, and registers
     the app in Apps & features so it can be uninstalled normally.
 
@@ -24,12 +24,12 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $publishDir = Join-Path $repoRoot "publish"
 $outputDir = Join-Path $PSScriptRoot "output"
-$wxs = Join-Path $PSScriptRoot "modshell-hwtest.wxs"
-$msi = Join-Path $outputDir "modshell-hwtest-$Version.msi"
+$wxs = Join-Path $PSScriptRoot "modshell-cs.wxs"
+$msi = Join-Path $outputDir "modshell-cs-$Version.msi"
 
 Write-Host "Publishing $Configuration / $Runtime (self-contained)..." -ForegroundColor Cyan
 if (Test-Path $publishDir) { Remove-Item -Recurse -Force $publishDir }
-dotnet publish (Join-Path $repoRoot "modshell-hwtest.csproj") `
+dotnet publish (Join-Path $repoRoot "modshell-cs.csproj") `
     -c $Configuration -r $Runtime --self-contained true -o $publishDir
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed with exit code $LASTEXITCODE" }
 

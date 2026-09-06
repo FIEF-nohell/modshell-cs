@@ -2,7 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Media;
 
-namespace modshell_hwtest.Views;
+namespace modshell_cs.Views;
 
 public static class GaugeArc
 {

@@ -3,7 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 
-namespace modshell_hwtest.Views;
+namespace modshell_cs.Views;
 
 public partial class RadialGauge : UserControl
 {

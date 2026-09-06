@@ -1,4 +1,4 @@
-namespace modshell_hwtest.Models;
+namespace modshell_cs.Models;
 
 /// <summary>
 /// Aggregate view of the ping window: a single reading says almost nothing

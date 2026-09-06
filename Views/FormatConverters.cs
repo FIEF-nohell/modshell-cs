@@ -4,7 +4,7 @@ using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
-namespace modshell_hwtest.Views;
+namespace modshell_cs.Views;
 
 /// <summary>
 /// Routes a single bound value through <see cref="Formatting"/>.

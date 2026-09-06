@@ -1,6 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="using:modshell_hwtest.Controls"
+        xmlns:controls="using:modshell_cs.Controls"
         xmlns:conv="using:Avalonia.Data.Converters">
 
     <!-- One row layout for every label + bar/graph + value line in the app. -->

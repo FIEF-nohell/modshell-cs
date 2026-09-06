@@ -2,9 +2,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using modshell_hwtest.ViewModels;
+using modshell_cs.ViewModels;
 
-namespace modshell_hwtest;
+namespace modshell_cs;
 
 /// <summary>
 /// Given a view model, returns the corresponding view if possible.
