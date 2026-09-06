@@ -32,7 +32,7 @@ public class MetricFormatConverter : IValueConverter
 
 /// <summary>
 /// Routes a used/total pair through <see cref="Formatting"/>.
-/// ConverterParameter picks the unit: Gigabytes or Megabytes.
+/// ConverterParameter picks the unit: Gigabytes, Megabytes or MegabytesAsGigabytes.
 /// </summary>
 public class MetricPairFormatConverter : IMultiValueConverter
 {
@@ -44,6 +44,7 @@ public class MetricPairFormatConverter : IMultiValueConverter
         return (parameter as string) switch
         {
             "Megabytes" => Formatting.Megabytes(used, total),
+            "MegabytesAsGigabytes" => Formatting.MegabytesAsGigabytes(used, total),
             _ => Formatting.Gigabytes(used, total),
         };
     }

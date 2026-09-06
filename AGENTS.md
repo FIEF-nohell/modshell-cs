@@ -23,9 +23,14 @@ Releases are cut by pushing a semver tag. That triggers
 attaches it to a GitHub Release.
 
 1. Make sure `main` is green (check the CI workflow badge/run).
-2. Pick the next version. This project does not yet track a version file;
-   the tag itself is the source of truth and flows into the MSI's
-   `ProductVersion` via `-Version` in `installer/build-installer.ps1`.
+2. Pick the next version and bump `<Version>` in `modshell-cs.csproj` to
+   match in the same commit. The tag stays the source of truth for what
+   actually ships: `installer/build-installer.ps1` passes `-Version` as
+   `-p:Version` to `dotnet publish` (which the title bar reads back via
+   `AssemblyInformationalVersionAttribute`) and as the MSI's
+   `ProductVersion`, overriding whatever is committed in the csproj. The
+   csproj value only matters for local `dotnet run`/`dotnet build`, so
+   keeping it current avoids a stale version showing in dev builds.
 3. Tag and push:
 
    ```bash

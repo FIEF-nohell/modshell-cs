@@ -74,6 +74,19 @@ public static class Formatting
             CultureInfo.InvariantCulture, "{0:0} / {1:0} MB", u, t);
     }
 
+    /// <summary>Same as <see cref="Gigabytes"/> but the inputs are megabytes,
+    /// for sensors (VRAM) that report in MB while the panel shows GB.</summary>
+    public static string MegabytesAsGigabytes(object? usedMb, object? totalMb)
+    {
+        if (!TryNumber(usedMb, out var u) || !TryNumber(totalMb, out var t))
+        {
+            return Unavailable;
+        }
+
+        return string.Format(
+            CultureInfo.InvariantCulture, "{0:0.0} / {1:0.0} GB", u / 1024, t / 1024);
+    }
+
     private static bool TryNumber(object? value, out double result)
     {
         result = 0;

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -56,7 +58,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private readonly LatencyTracker _latency = new(LatencyWindowSeconds);
 
     private readonly Axis _memYAxis = YAxis(32);
-    private readonly Axis _vramYAxis = YAxis(8192);
+    private readonly Axis _vramYAxis = YAxis(8);
 
     [ObservableProperty]
     private HardwareSnapshot _currentSnapshot = new("...", 0, null, [], "...", 0, null, null, null, null, 0, 0, 0, 0, null);
@@ -70,6 +72,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private string _latencyWindowLabel = "warming up";
 
     public string PingHeader { get; } = $"PING · {PingHost.ToUpperInvariant()}";
+
+    public string AppTitle { get; } = $"modshell hardware monitor - v{ResolveVersion()}";
 
     public ObservableCollection<CoreUsageItem> PerCoreItems { get; } = new();
 
@@ -124,13 +128,14 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
         MemoryYAxes = [_memYAxis];
         GpuVramYAxes = [_vramYAxis];
+        _vramYAxis.Labeler = value => value.ToString("0.0", CultureInfo.InvariantCulture);
 
         CpuUtilizationSeries = [Trace(_cpuUsageHistory, CpuTraceColor, "cpu", "%")];
         CpuThermalSeries = [Trace(_cpuTempHistory, CpuTraceColor, "cpu", "°C")];
         GpuUtilizationSeries = [Trace(_gpuUsageHistory, GpuTraceColor, "gpu", "%")];
         GpuThermalSeries = [Trace(_gpuTempHistory, GpuTraceColor, "gpu", "°C")];
         MemorySeries = [Trace(_memUsedHistory, MemTraceColor, "mem", " GB")];
-        GpuVramSeries = [Trace(_gpuVramUsedHistory, GpuTraceColor, "vram", " MB")];
+        GpuVramSeries = [Trace(_gpuVramUsedHistory, GpuTraceColor, "vram", " GB", "0.0")];
         NetUpSeries = [Spark(_netUpHistory, CpuTraceColor, "up", v => Formatting.BytesPerSecond(v))];
         NetDownSeries = [Spark(_netDownHistory, CpuTraceColor, "down", v => Formatting.BytesPerSecond(v))];
         PingSeries = [Spark(_pingHistory, CpuTraceColor, "ping", v => Formatting.Milliseconds(v))];
@@ -139,7 +144,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     }
 
     private static LineSeries<double> Trace(
-        ObservableCollection<double> values, SKColor color, string name, string unit) => new()
+        ObservableCollection<double> values, SKColor color, string name, string unit, string numberFormat = "0.#") => new()
     {
         Name = name,
         Values = values,
@@ -151,7 +156,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         Stroke = new SolidColorPaint(color, 2),
         // Hovering the chart reports the reading under the cursor. The tooltip
         // already labels each row with the series name, so only the value here.
-        YToolTipLabelFormatter = point => $"{point.Coordinate.PrimaryValue:0.#}{unit}",
+        YToolTipLabelFormatter = point =>
+            point.Coordinate.PrimaryValue.ToString(numberFormat, CultureInfo.InvariantCulture) + unit,
     };
 
     private static LineSeries<double> Spark(
@@ -183,6 +189,13 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         MinLimit = 0,
         MaxLimit = HistoryLength,
     };
+
+    /// <summary>Reads the version baked into the assembly at build time
+    /// (Version in the csproj, overridden at publish for real releases),
+    /// so the title bar always shows what actually shipped.</summary>
+    private static string ResolveVersion() =>
+        Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+        ?? "dev";
 
     private static Axis HiddenAxis() => new() { IsVisible = false };
 
@@ -242,7 +255,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
                 if (snapshot.GpuVramTotalMb is > 0)
                 {
-                    _vramYAxis.MaxLimit = snapshot.GpuVramTotalMb.Value;
+                    _vramYAxis.MaxLimit = snapshot.GpuVramTotalMb.Value / 1024.0;
                 }
 
                 AppendHistory(_cpuUsageHistory, snapshot.CpuUsage);
@@ -250,7 +263,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
                 AppendHistory(_cpuTempHistory, snapshot.CpuTempC ?? 0);
                 AppendHistory(_gpuTempHistory, snapshot.GpuTempC ?? 0);
                 AppendHistory(_memUsedHistory, snapshot.MemUsedGb);
-                AppendHistory(_gpuVramUsedHistory, snapshot.GpuVramUsedMb ?? 0);
+                AppendHistory(_gpuVramUsedHistory, (snapshot.GpuVramUsedMb ?? 0) / 1024.0);
                 AppendHistory(_netUpHistory, snapshot.NetUpBytesPerSec);
                 AppendHistory(_netDownHistory, snapshot.NetDownBytesPerSec);
                 AppendHistory(_pingHistory, snapshot.PingMs ?? 0);

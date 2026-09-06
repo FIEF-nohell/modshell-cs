@@ -30,7 +30,8 @@ $msi = Join-Path $outputDir "modshell-cs-$Version.msi"
 Write-Host "Publishing $Configuration / $Runtime (self-contained)..." -ForegroundColor Cyan
 if (Test-Path $publishDir) { Remove-Item -Recurse -Force $publishDir }
 dotnet publish (Join-Path $repoRoot "modshell-cs.csproj") `
-    -c $Configuration -r $Runtime --self-contained true -o $publishDir
+    -c $Configuration -r $Runtime --self-contained true -o $publishDir `
+    -p:Version=$Version
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed with exit code $LASTEXITCODE" }
 
 $wixCmd = Get-Command wix -ErrorAction SilentlyContinue

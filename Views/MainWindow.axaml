@@ -10,7 +10,7 @@
         x:Class="modshell_cs.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/app-icon.ico"
-        Title="modshell hardware monitor"
+        Title="{Binding AppTitle}"
         Width="1000" Height="820"
         MinWidth="900" MinHeight="740"
         Background="#0D0C12"
@@ -28,6 +28,14 @@
         <views:CoreColumnsConverter x:Key="CoreColumns" />
         <views:LoadHeatColorConverter x:Key="HeatColor" />
     </Window.Resources>
+
+    <Panel>
+    <!-- Hit-test-disabled so this stays part of the draggable title bar strip
+         (see the ScrollViewer-margin fix below: any hit-testable control here
+         breaks window dragging). -->
+    <TextBlock Text="{Binding AppTitle}" IsHitTestVisible="False"
+               FontFamily="{StaticResource Mono}" FontSize="12" Foreground="#8B87A0"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18,11,0,0" />
 
     <ScrollViewer Margin="18,42,18,18" VerticalScrollBarVisibility="Auto">
     <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,*,*">
@@ -161,17 +169,11 @@
                                         Value="{Binding LatencyStats.Average, Converter={StaticResource Fmt}, ConverterParameter=MillisecondsFine}" />
                     <controls:MetricRow Margin="0,3,0,3" LabelMinWidth="30" ValueMinWidth="56" Label="jitter"
                                         Value="{Binding LatencyStats.Jitter, Converter={StaticResource Fmt}, ConverterParameter=MillisecondsFine}" />
-                    <controls:MetricRow Margin="0,3,10,3" LabelMinWidth="30" ValueMinWidth="56" Label="p50"
-                                        Value="{Binding LatencyStats.P50, Converter={StaticResource Fmt}, ConverterParameter=Milliseconds}" />
-                    <controls:MetricRow Margin="0,3,0,3" LabelMinWidth="30" ValueMinWidth="56" Label="p95"
-                                        Value="{Binding LatencyStats.P95, Converter={StaticResource Fmt}, ConverterParameter=Milliseconds}" />
-                    <controls:MetricRow Margin="0,3,10,3" LabelMinWidth="30" ValueMinWidth="56" Label="p99"
-                                        Value="{Binding LatencyStats.P99, Converter={StaticResource Fmt}, ConverterParameter=Milliseconds}" />
-                    <controls:MetricRow Margin="0,3,0,3" LabelMinWidth="30" ValueMinWidth="56" Label="loss"
+                    <controls:MetricRow Margin="0,3,10,3" LabelMinWidth="30" ValueMinWidth="56" Label="loss"
                                         Value="{Binding LatencyStats.LossPercent, Converter={StaticResource Fmt}, ConverterParameter=PercentFine}" />
-                    <controls:MetricRow Margin="0,3,10,3" LabelMinWidth="30" ValueMinWidth="56" Label="min"
+                    <controls:MetricRow Margin="0,3,0,3" LabelMinWidth="30" ValueMinWidth="56" Label="min"
                                         Value="{Binding LatencyStats.Min, Converter={StaticResource Fmt}, ConverterParameter=Milliseconds}" />
-                    <controls:MetricRow Margin="0,3,0,3" LabelMinWidth="30" ValueMinWidth="56" Label="max"
+                    <controls:MetricRow Margin="0,3,10,3" LabelMinWidth="30" ValueMinWidth="56" Label="max"
                                         Value="{Binding LatencyStats.Max, Converter={StaticResource Fmt}, ConverterParameter=Milliseconds}" />
                 </UniformGrid>
             </StackPanel>
@@ -209,7 +211,7 @@
                     <TextBlock Grid.Column="1" Classes="rowLabel" HorizontalAlignment="Right"
                                TextTrimming="CharacterEllipsis">
                         <TextBlock.Text>
-                            <MultiBinding Converter="{StaticResource FmtPair}" ConverterParameter="Megabytes">
+                            <MultiBinding Converter="{StaticResource FmtPair}" ConverterParameter="MegabytesAsGigabytes">
                                 <Binding Path="CurrentSnapshot.GpuVramUsedMb" />
                                 <Binding Path="CurrentSnapshot.GpuVramTotalMb" />
                             </MultiBinding>
@@ -294,5 +296,6 @@
 
     </Grid>
     </ScrollViewer>
+    </Panel>
 
 </Window>
