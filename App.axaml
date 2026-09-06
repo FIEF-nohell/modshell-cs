@@ -9,6 +9,19 @@
         <FontFamily x:Key="Mono">Cascadia Mono,Consolas,Courier New,monospace</FontFamily>
     </Application.Resources>
 
+    <TrayIcon.Icons>
+        <TrayIcons>
+            <TrayIcon ToolTipText="modshell hwtest" Icon="/Assets/app-icon.ico" Clicked="OnTrayIconClicked">
+                <TrayIcon.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Header="Show" Click="OnTrayShowClicked" />
+                        <NativeMenuItem Header="Exit" Click="OnTrayExitClicked" />
+                    </NativeMenu>
+                </TrayIcon.Menu>
+            </TrayIcon>
+        </TrayIcons>
+    </TrayIcon.Icons>
+
     <Application.DataTemplates>
         <local:ViewLocator />
     </Application.DataTemplates>
