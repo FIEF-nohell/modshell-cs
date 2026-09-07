@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>modshell-cs</AssemblyName>
     <RootNamespace>modshell_cs</RootNamespace>
-    <Version>0.5.1</Version>
+    <Version>0.5.2</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
   </PropertyGroup>

@@ -96,15 +96,15 @@
             </UniformGrid>
         </controls:StatCard>
 
-        <!-- Row 1: physical-core detail. Below the high-core-count threshold this is a
+        <!-- Row 1: logical-processor detail. Below the high-core-count threshold this is a
              label+bar+% list; above it (Threadripper/Xeon territory) that stops
              being legible so it switches to a compact color-coded tile grid. -->
         <Border Classes="panel" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
             <StackPanel>
                 <Grid ColumnDefinitions="Auto,*">
-                    <TextBlock Grid.Column="0" Classes="sectionHeader" Text="CORES" />
+                    <TextBlock Grid.Column="0" Classes="sectionHeader" Text="THREADS" />
                     <TextBlock Grid.Column="1" Classes="rowLabel" HorizontalAlignment="Right"
-                               Text="{Binding CoreCount, StringFormat='{}{0} cores'}" />
+                               Text="{Binding CoreCount, StringFormat='{}{0} logical processors'}" />
                 </Grid>
 
                 <ItemsControl IsVisible="{Binding !IsHighCoreCount}" ItemsSource="{Binding PerCoreItems}">
@@ -117,7 +117,7 @@
                         <DataTemplate x:DataType="vm:CoreUsageItem">
                             <controls:MetricRow Margin="0,4,18,4"
                                                 LabelMinWidth="30" ValueMinWidth="46"
-                                                Label="{Binding Index, StringFormat='C{0}'}"
+                                                Label="{Binding Index, StringFormat='T{0}'}"
                                                 Value="{Binding Value, Converter={StaticResource Fmt}, ConverterParameter=Percent}">
                                 <lvc:CartesianChart Series="{Binding Series}"
                                                     XAxes="{Binding XAxes}" YAxes="{Binding YAxes}"
@@ -137,7 +137,7 @@
                         <DataTemplate x:DataType="vm:CoreUsageItem">
                             <Border Width="20" Height="20" Margin="2" CornerRadius="4"
                                     Background="{Binding Value, Converter={StaticResource HeatColor}}"
-                                    ToolTip.Tip="{Binding Index, StringFormat='Core {0}'}" />
+                                    ToolTip.Tip="{Binding Index, StringFormat='Thread {0}'}" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

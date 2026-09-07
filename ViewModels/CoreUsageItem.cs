@@ -6,8 +6,8 @@ using LiveChartsCore.SkiaSharpView;
 namespace modshell_cs.ViewModels;
 
 /// <summary>
-/// One physical core in the per-core panel. Unlike the other readings this is
-/// created once per core and updated in place: the sparkline needs its history
+/// One logical processor in the thread panel. Unlike the other readings this is
+/// created once per thread and updated in place: the sparkline needs its history
 /// to survive every tick, which a value replaced each second cannot do.
 /// </summary>
 public partial class CoreUsageItem : ObservableObject

@@ -30,9 +30,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     // sort every tick without noticing.
     private const int LatencyWindowSeconds = 600;
 
-    // Above this many physical cores the per-core list (label + bar + %) no
+    // Above this many logical processors the per-thread list (label + bar + %) no
     // longer fits legibly, so the view switches to a compact heat-tile grid.
-    // Chosen so mainstream desktop/laptop CPUs (up to 32 cores) keep the
+    // Chosen so mainstream desktop/laptop CPUs (up to 32 threads) keep the
     // detailed list, while HEDT/workstation chips (Threadripper, Xeon) get tiles.
     private const int HighCoreCountThreshold = 32;
 
@@ -204,8 +204,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     /// share one scale instead of each autoscaling to its own peak.</summary>
     private static Axis HiddenAxis(double max) => new() { IsVisible = false, MinLimit = 0, MaxLimit = max };
 
-    /// <summary>Builds a physical core row and its sparkline. Cores are created once and
-    /// then mutated in place, so this only runs when the core count changes.</summary>
+    /// <summary>Builds a thread row and its sparkline. Rows are created once and
+    /// then mutated in place, so this only runs when the thread count changes.</summary>
     private static CoreUsageItem CreateCoreItem(int index)
     {
         var history = new ObservableCollection<double>();
@@ -343,7 +343,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         var cpuName = cpu?.Name ?? "Unknown CPU";
         var cpuUsage = cpu?.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Load && s.Name == "CPU Total")?.Value ?? 0f;
         var cpuTemp = cpu?.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Temperature && s.Name.Contains("Package"))?.Value;
-        var perCore = BuildPhysicalCoreUsage(cpu);
+        var perCore = BuildLogicalProcessorUsage(cpu);
 
         var gpuName = gpu?.Name ?? "No GPU detected";
         var gpuUsage = gpu?.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Load && s.Name.Contains("Core"))?.Value ?? 0f;
@@ -378,42 +378,49 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             pingMs);
     }
 
-    private static double[] BuildPhysicalCoreUsage(IHardware? cpu)
+    private static double[] BuildLogicalProcessorUsage(IHardware? cpu)
     {
         var loadSensors = cpu?.Sensors
             .Where(s => s.SensorType == SensorType.Load
                         && s.Name.StartsWith("CPU Core", StringComparison.OrdinalIgnoreCase))
             .ToArray() ?? [];
-        var threadSensors = loadSensors
-            .Where(s => s.Name.Contains("Thread", StringComparison.OrdinalIgnoreCase))
-            .ToArray();
-        var selectedSensors = threadSensors.Length > 0 ? threadSensors : loadSensors;
 
-        var coreLoads = selectedSensors
+        var threadCoreIndexes = loadSensors
+            .Where(s => s.Name.Contains("Thread", StringComparison.OrdinalIgnoreCase))
+            .Select(s => TryParseCoreIndex(s.Name))
+            .Where(index => index is not null)
+            .Select(index => index!.Value)
+            .ToHashSet();
+
+        var threadLoads = loadSensors
+            .Where(s =>
+            {
+                if (s.Name.Contains("Thread", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                var coreIndex = TryParseCoreIndex(s.Name);
+                return coreIndex is null || !threadCoreIndexes.Contains(coreIndex.Value);
+            })
             .Select(s => new
             {
                 Sensor = s,
                 CoreIndex = TryParseCoreIndex(s.Name),
+                ThreadIndex = TryParseThreadIndex(s.Name),
                 Value = (double)(s.Value ?? 0),
             })
             .ToArray();
 
-        if (coreLoads.Length == 0)
+        if (threadLoads.Length == 0)
         {
             return [];
         }
 
-        if (coreLoads.All(s => s.CoreIndex is not null))
-        {
-            return coreLoads
-                .GroupBy(s => s.CoreIndex!.Value)
-                .OrderBy(g => g.Key)
-                .Select(g => g.Average(s => s.Value))
-                .ToArray();
-        }
-
-        return coreLoads
-            .OrderBy(s => s.Sensor.Name, StringComparer.OrdinalIgnoreCase)
+        return threadLoads
+            .OrderBy(s => s.CoreIndex ?? int.MaxValue)
+            .ThenBy(s => s.ThreadIndex ?? 0)
+            .ThenBy(s => s.Sensor.Name, StringComparer.OrdinalIgnoreCase)
             .Select(s => s.Value)
             .ToArray();
     }
@@ -421,6 +428,14 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private static int? TryParseCoreIndex(string sensorName)
     {
         var match = Regex.Match(sensorName, @"CPU Core\s*#?(\d+)", RegexOptions.IgnoreCase);
+        return match.Success && int.TryParse(match.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index)
+            ? index
+            : null;
+    }
+
+    private static int? TryParseThreadIndex(string sensorName)
+    {
+        var match = Regex.Match(sensorName, @"Thread\s*#?(\d+)", RegexOptions.IgnoreCase);
         return match.Success && int.TryParse(match.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index)
             ? index
             : null;
