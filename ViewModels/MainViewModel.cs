@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -29,9 +30,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     // sort every tick without noticing.
     private const int LatencyWindowSeconds = 600;
 
-    // Above this many logical cores the per-core list (label + bar + %) no
+    // Above this many physical cores the per-core list (label + bar + %) no
     // longer fits legibly, so the view switches to a compact heat-tile grid.
-    // Chosen so mainstream desktop/laptop CPUs (up to 32 threads) keep the
+    // Chosen so mainstream desktop/laptop CPUs (up to 32 cores) keep the
     // detailed list, while HEDT/workstation chips (Threadripper, Xeon) get tiles.
     private const int HighCoreCountThreshold = 32;
 
@@ -203,7 +204,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     /// share one scale instead of each autoscaling to its own peak.</summary>
     private static Axis HiddenAxis(double max) => new() { IsVisible = false, MinLimit = 0, MaxLimit = max };
 
-    /// <summary>Builds a core row and its sparkline. Cores are created once and
+    /// <summary>Builds a physical core row and its sparkline. Cores are created once and
     /// then mutated in place, so this only runs when the core count changes.</summary>
     private static CoreUsageItem CreateCoreItem(int index)
     {
@@ -342,11 +343,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         var cpuName = cpu?.Name ?? "Unknown CPU";
         var cpuUsage = cpu?.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Load && s.Name == "CPU Total")?.Value ?? 0f;
         var cpuTemp = cpu?.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Temperature && s.Name.Contains("Package"))?.Value;
-        var perCore = cpu?.Sensors
-            .Where(s => s.SensorType == SensorType.Load && s.Name.StartsWith("CPU Core"))
-            .OrderBy(s => s.Name)
-            .Select(s => (double)(s.Value ?? 0))
-            .ToArray() ?? [];
+        var perCore = BuildPhysicalCoreUsage(cpu);
 
         var gpuName = gpu?.Name ?? "No GPU detected";
         var gpuUsage = gpu?.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Load && s.Name.Contains("Core"))?.Value ?? 0f;
@@ -379,6 +376,54 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             upBytes,
             downBytes,
             pingMs);
+    }
+
+    private static double[] BuildPhysicalCoreUsage(IHardware? cpu)
+    {
+        var loadSensors = cpu?.Sensors
+            .Where(s => s.SensorType == SensorType.Load
+                        && s.Name.StartsWith("CPU Core", StringComparison.OrdinalIgnoreCase))
+            .ToArray() ?? [];
+        var threadSensors = loadSensors
+            .Where(s => s.Name.Contains("Thread", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        var selectedSensors = threadSensors.Length > 0 ? threadSensors : loadSensors;
+
+        var coreLoads = selectedSensors
+            .Select(s => new
+            {
+                Sensor = s,
+                CoreIndex = TryParseCoreIndex(s.Name),
+                Value = (double)(s.Value ?? 0),
+            })
+            .ToArray();
+
+        if (coreLoads.Length == 0)
+        {
+            return [];
+        }
+
+        if (coreLoads.All(s => s.CoreIndex is not null))
+        {
+            return coreLoads
+                .GroupBy(s => s.CoreIndex!.Value)
+                .OrderBy(g => g.Key)
+                .Select(g => g.Average(s => s.Value))
+                .ToArray();
+        }
+
+        return coreLoads
+            .OrderBy(s => s.Sensor.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(s => s.Value)
+            .ToArray();
+    }
+
+    private static int? TryParseCoreIndex(string sensorName)
+    {
+        var match = Regex.Match(sensorName, @"CPU Core\s*#?(\d+)", RegexOptions.IgnoreCase);
+        return match.Success && int.TryParse(match.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index)
+            ? index
+            : null;
     }
 
     public void Dispose()

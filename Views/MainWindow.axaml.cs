@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 
@@ -5,24 +6,43 @@ namespace modshell_cs.Views;
 
 public partial class MainWindow : Window
 {
+    private bool _allowClose;
+
     public MainWindow()
     {
         InitializeComponent();
     }
 
-    // Minimizing hides the window instead of leaving a taskbar entry, since the
-    // tray icon is the only affordance needed while polling continues in the
-    // background. The hardware loop lives in the view model, not the window,
-    // so it keeps running whether the window is shown, hidden or minimized.
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    // The title-bar close button sends the monitor to tray. The only real
+    // shutdown path is the tray menu's Close item.
+    protected override void OnClosing(WindowClosingEventArgs e)
     {
-        base.OnPropertyChanged(change);
-
-        if (change.Property == WindowStateProperty && change.GetNewValue<WindowState>() == WindowState.Minimized)
+        if (!_allowClose)
         {
-            Hide();
+            e.Cancel = true;
+            WindowState = WindowState.Normal;
             ShowInTaskbar = false;
+            Hide();
+            return;
         }
+
+        base.OnClosing(e);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        if (DataContext is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        base.OnClosed(e);
+    }
+
+    public void CloseFromTray()
+    {
+        _allowClose = true;
+        Close();
     }
 
     public void RestoreFromTray()

@@ -96,7 +96,7 @@
             </UniformGrid>
         </controls:StatCard>
 
-        <!-- Row 1: per-core detail. Below the high-core-count threshold this is a
+        <!-- Row 1: physical-core detail. Below the high-core-count threshold this is a
              label+bar+% list; above it (Threadripper/Xeon territory) that stops
              being legible so it switches to a compact color-coded tile grid. -->
         <Border Classes="panel" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
@@ -104,7 +104,7 @@
                 <Grid ColumnDefinitions="Auto,*">
                     <TextBlock Grid.Column="0" Classes="sectionHeader" Text="CORES" />
                     <TextBlock Grid.Column="1" Classes="rowLabel" HorizontalAlignment="Right"
-                               Text="{Binding CoreCount, StringFormat='{}{0} threads'}" />
+                               Text="{Binding CoreCount, StringFormat='{}{0} cores'}" />
                 </Grid>
 
                 <ItemsControl IsVisible="{Binding !IsHighCoreCount}" ItemsSource="{Binding PerCoreItems}">

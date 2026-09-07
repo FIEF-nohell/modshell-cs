@@ -15,7 +15,7 @@
                 <TrayIcon.Menu>
                     <NativeMenu>
                         <NativeMenuItem Header="Show" Click="OnTrayShowClicked" />
-                        <NativeMenuItem Header="Exit" Click="OnTrayExitClicked" />
+                        <NativeMenuItem Header="Close" Click="OnTrayCloseClicked" />
                     </NativeMenu>
                 </TrayIcon.Menu>
             </TrayIcon>

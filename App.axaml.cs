@@ -28,16 +28,16 @@ public partial class App : Application
     }
 
     // The tray icon exists so the app can keep polling hardware in the
-    // background after the window is minimized, with a way back to the UI.
+    // background after the window is closed to tray, with a way back to the UI.
     private void OnTrayIconClicked(object? sender, EventArgs e) => ShowMainWindow();
 
     private void OnTrayShowClicked(object? sender, EventArgs e) => ShowMainWindow();
 
-    private void OnTrayExitClicked(object? sender, EventArgs e)
+    private void OnTrayCloseClicked(object? sender, EventArgs e)
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime { MainWindow: MainWindow window })
         {
-            desktop.Shutdown();
+            window.CloseFromTray();
         }
     }
 
